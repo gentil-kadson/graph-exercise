@@ -5,7 +5,9 @@ class Node:
         self.data = data
         self.next = None
         self.weight = weight
-        self.visited = False
+
+    def __repr__(self):
+        return self.data
 
 
 class LinkedList:
@@ -52,15 +54,16 @@ class LinkedList:
 class Graph:
     def __init__(self) -> None:
         self.vertices: dict[int|str, LinkedList] = {}
-        self.max_cost: int = 0
+        self.max_cost: int = -1
         self.max_path: list[Node] = []
+        self.visited_dfs: list[str|int] = []
     
     def insert_vertex(self, vertex: int|str) -> None:
         if vertex in self.vertices:
             print("Esse vértice já está no grafo.")
             return
         self.vertices[vertex] = LinkedList()
-    
+
     def insert_edge(self, vertexA: int|str, vertexB: int|str, weight: int) -> None:
         if vertexA not in self.vertices or vertexB not in self.vertices:
             print("Um dos vértices informados não existe.")
@@ -79,37 +82,39 @@ class Graph:
                 print("Não tem vizinhos.")
                 continue
             curr_vertex.print()
+    
+    def reset_max_path_and_cost(self):
+        self.max_cost = -1
+        self.max_path = []
+        self.visited_dfs = []
 
     def dfs_biggest_cost(
             self, 
             fron: int|str, 
             to: int|str, 
             current_cost: int, 
-            current_path: list[Node]
+            current_path: list[int|str]
     ) -> None:
-        if fron not in self.vertices:
+        if fron not in self.vertices or to not in self.vertices:
             raise Exception("Vertex doesn't exist in graph")
 
-        from_vertex: Node = self.vertices[fron]
-        from_vertex.visited = True
+        self.visited_dfs.append(fron)
         if fron == to:
             if current_cost > self.max_cost:
                 self.max_cost = current_cost
                 self.max_path = current_path
-            from_vertex.visited = False
-            return
-        
+
         current = self.vertices[fron].head
-        while current.next:
-            adjacent_vertex: Node = current.next
-            if not adjacent_vertex.visited:
+        while current:
+            if current.data not in self.visited_dfs:
                 self.dfs_biggest_cost(
-                    adjacent_vertex.data, 
-                    to, 
-                    current_cost + adjacent_vertex.weight,
-                    current_path + [adjacent_vertex]
+                    current.data,
+                    to,
+                    current_cost + current.weight,
+                    current_path + [current]
                 )
-        from_vertex.visited = False
+            current = current.next
+        self.visited_dfs.remove(fron)
 
     def bfs_least_hops(self, fron: Node, to: Node) -> int | str:
         queue: list[Node] = []
@@ -141,3 +146,6 @@ with open("grafo.csv", "r", newline='') as csv_file:
         graph.insert_edge(fron, to, int(row["Peso"]))
 
 graph.print()
+graph.dfs_biggest_cost("A", "I", 0, [])
+print(graph.max_cost)
+print(graph.max_path)
