@@ -9,7 +9,7 @@ class Node:
 
 
 class LinkedList:
-    def __init__(self, head: Node | None = None) -> None:
+    def __init__(self, head: Node|None = None) -> None:
         self.head = head
     
     def append(self, data: int|str, weight: int) -> None:
@@ -41,11 +41,12 @@ class LinkedList:
             current = current.next
         print()
     
-    def get_connected_vertices(self) -> list[Node]:
+    def get_connected_vertices(self) -> list[int|str]:
         vertices = []
         current = self.head
         while current:
-            vertices.append(current)
+            vertices.append(current.data)
+            current = current.next
         return vertices
     
 
@@ -111,23 +112,21 @@ class Graph:
                 )
         from_vertex.visited = False
 
-    def bfs_least_hops(self, fron: Node, to: Node) -> int | str:
-        queue: list[Node] = []
-        visited_vertices: list[Node] = []
-        hops = 0
-        
-        queue.append(fron)
+    def bfs_least_jumps(self, fron: int | str, to: int | str) -> int | str:
+        queue: list[tuple[int | str, int]] = []
+        visited_vertices: list[int | str] = []
+
+        queue.append((fron, 0))
         visited_vertices.append(fron)
 
         while len(queue) > 0:
-            curr_vertex = queue.pop(0)
-            if curr_vertex is to:
-                return hops
+            curr_vertex, jumps = queue.pop(0)
+            if curr_vertex == to:
+                return jumps
             for connected_vertex in self.vertices[curr_vertex].get_connected_vertices():
                 if connected_vertex not in visited_vertices:
-                    queue.append(connected_vertex)
                     visited_vertices.append(connected_vertex)
-                    hops += 1
+                    queue.append((connected_vertex, jumps+1))
         return "Nenhum caminho encontrado"
     
 graph = Graph()
@@ -141,3 +140,7 @@ with open("grafo.csv", "r", newline='') as csv_file:
         graph.insert_edge(fron, to, int(row["Peso"]))
 
 graph.print()
+
+jumps = graph.bfs_least_jumps("D", "A")
+print("-" * 24)
+print(f"Resultado: {jumps} salto(s).")
