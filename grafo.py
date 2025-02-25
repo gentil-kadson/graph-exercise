@@ -129,16 +129,25 @@ class Graph:
     def bfs_least_jumps(self, fron: int | str, to: int | str) -> int | str:
         queue: list[tuple[int | str, int]] = []
         visited_vertices: list[int | str] = []
+        predecessor: dict[int | str, int | str | None] = {}
 
         queue.append((fron, 0))
         visited_vertices.append(fron)
+        predecessor[fron] = None
 
         while len(queue) > 0:
             curr_vertex, jumps = queue.pop(0)
             if curr_vertex == to:
-                return jumps
+                path = []
+                while curr_vertex:
+                    path.append(curr_vertex)
+                    curr_vertex = predecessor[curr_vertex]
+                path.reverse()
+                return (jumps, path)
+            
             for connected_vertex in self.vertices[curr_vertex].get_connected_vertices():
                 if connected_vertex not in visited_vertices:
                     visited_vertices.append(connected_vertex)
+                    predecessor[connected_vertex] = curr_vertex
                     queue.append((connected_vertex, jumps+1))
         return "Nenhum caminho encontrado"
