@@ -8,14 +8,6 @@ from grafo import Graph
 graph = Graph()
 graph.read_csv("grafo.csv")
 
-G = nx.Graph()
-
-for vertex, adjacent in graph.vertices.items():
-    current = adjacent.head
-    while current:
-        G.add_edge(vertex, current.data, weight=current.weight)
-        current = current.next
-
 print(24 * "=")
 print("Exploração do Mapa")
 print(24 * "=")
@@ -40,7 +32,4 @@ def interact_with_map():
 app_thread = Thread(target=interact_with_map)
 app_thread.start()
 
-plt.subplot(121)
-nx.draw(G, with_labels=True, font_weight="bold")
-plt.show()
-
+graph.draw_graph()

@@ -1,4 +1,7 @@
+import networkx as nx
+import matplotlib.pyplot as plt
 import csv
+
 
 class Node:
     def __init__(self, data: int|str, weight: int|None = None) -> None:
@@ -151,3 +154,14 @@ class Graph:
                     predecessor[connected_vertex] = curr_vertex
                     queue.append((connected_vertex, jumps+1))
         return "Nenhum caminho encontrado"
+    
+    def draw_graph(self) -> None:
+        G = nx.Graph()
+        for vertex, adjacent in self.vertices.items():
+            current = adjacent.head
+            while current:
+                G.add_edge(vertex, current.data, weight=current.weight)
+                current = current.next
+        plt.subplot(122)
+        nx.draw(G, with_labels=True, font_weight="bold")
+        plt.show()
