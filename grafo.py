@@ -120,36 +120,45 @@ class Graph:
     def bfs_least_jumps(self, fron: int | str, to: int | str) -> int | str:
         queue: list[tuple[int | str, int]] = []
         visited_vertices: list[int | str] = []
+        predecessor: dict[int | str, int | str | None] = {}
 
         queue.append((fron, 0))
         visited_vertices.append(fron)
+        predecessor[fron] = None
 
         while len(queue) > 0:
             curr_vertex, jumps = queue.pop(0)
             if curr_vertex == to:
-                return jumps
+                path = []
+                while curr_vertex:
+                    path.append(curr_vertex)
+                    curr_vertex = predecessor[curr_vertex]
+                path.reverse()
+                return (jumps, path)
+            
             for connected_vertex in self.vertices[curr_vertex].get_connected_vertices():
                 if connected_vertex not in visited_vertices:
                     visited_vertices.append(connected_vertex)
+                    predecessor[connected_vertex] = curr_vertex
                     queue.append((connected_vertex, jumps+1))
         return "Nenhum caminho encontrado"
     
-graph = Graph()
+# graph = Graph()
 
-with open("grafo.csv", "r", newline='') as csv_file:
-    csv_reader = csv.DictReader(csv_file)
-    for row in csv_reader:
-        fron, to = row["Origem"], row["Destino"]
-        graph.insert_vertex(fron)
-        graph.insert_vertex(to)
-        graph.insert_edge(fron, to, int(row["Peso"]))
+# with open("grafo.csv", "r", newline='') as csv_file:
+#     csv_reader = csv.DictReader(csv_file)
+#     for row in csv_reader:
+#         fron, to = row["Origem"], row["Destino"]
+#         graph.insert_vertex(fron)
+#         graph.insert_vertex(to)
+#         graph.insert_edge(fron, to, int(row["Peso"]))
 
-graph.print()
+# graph.print()
 
-jumps = graph.bfs_least_jumps("D", "A")
-print("-" * 24)
-print(f"Resultado: {jumps} salto(s).")
+# jumps = graph.bfs_least_jumps("D", "A")
+# print("-" * 24)
+# print(f"Resultado: {jumps} salto(s).")
 
-graph.dfs_biggest_cost("A", "I", 0, [])
-print(graph.max_cost)
-print(graph.max_path)
+# graph.dfs_biggest_cost("A", "I", 0, [])
+# print(graph.max_cost)
+# print(graph.max_path)
