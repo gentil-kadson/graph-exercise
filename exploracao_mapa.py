@@ -1,6 +1,4 @@
 from threading import Thread
-import networkx as nx
-import matplotlib.pyplot as plt
 
 from grafo import Graph
 
