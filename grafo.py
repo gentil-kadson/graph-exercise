@@ -58,6 +58,15 @@ class Graph:
         self.max_cost: int = -1
         self.max_path: list[Node] = []
         self.visited_dfs: list[str|int] = []
+
+    def read_csv(self, filepath: str) -> None:
+        with open(filepath, "r", newline='') as csv_file:
+            csv_reader = csv.DictReader(csv_file)
+            for row in csv_reader:
+                fron, to = row["Origem"], row["Destino"]
+                self.insert_vertex(fron)
+                self.insert_vertex(to)
+                self.insert_edge(fron, to, int(row["Peso"]))
     
     def insert_vertex(self, vertex: int|str) -> None:
         if vertex in self.vertices:
@@ -133,23 +142,3 @@ class Graph:
                     visited_vertices.append(connected_vertex)
                     queue.append((connected_vertex, jumps+1))
         return "Nenhum caminho encontrado"
-    
-graph = Graph()
-
-with open("grafo.csv", "r", newline='') as csv_file:
-    csv_reader = csv.DictReader(csv_file)
-    for row in csv_reader:
-        fron, to = row["Origem"], row["Destino"]
-        graph.insert_vertex(fron)
-        graph.insert_vertex(to)
-        graph.insert_edge(fron, to, int(row["Peso"]))
-
-graph.print()
-
-jumps = graph.bfs_least_jumps("D", "A")
-print("-" * 24)
-print(f"Resultado: {jumps} salto(s).")
-
-graph.dfs_biggest_cost("A", "I", 0, [])
-print(graph.max_cost)
-print(graph.max_path)
