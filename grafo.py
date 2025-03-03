@@ -62,6 +62,9 @@ class Graph:
         self.max_path: list[Node] = []
         self.visited_dfs: list[str|int] = []
 
+        self.best_cost: int = 0
+        self.best_path: list[str|int] = []
+
     def read_csv(self, filepath: str) -> None:
         with open(filepath, "r", newline='') as csv_file:
             csv_reader = csv.DictReader(csv_file)
@@ -165,3 +168,51 @@ class Graph:
         plt.subplot(122)
         nx.draw(G, with_labels=True, font_weight="bold")
         plt.show()
+    
+    def tsp_dfs(
+        self,
+        fron: str|int,
+        current: str|int,
+        visited_cities: list[str|int],
+        current_cost: int,
+        current_path: list[str|int],
+        best_cost: int,
+        best_path: list[str|int]
+    ) -> tuple[int, list[str|int]]:
+        if len(visited_cities) == len(self.vertices):
+            adjacent = self.vertices[current].head
+            fron_to_current_cost: int = 0
+
+            while adjacent:
+                if adjacent.data == current:
+                    fron_to_current_cost = adjacent.weight
+                    break
+                adjacent = adjacent.next
+
+            self.total_cost = current_cost + fron_to_current_cost
+            if self.total_cost < best_cost:
+                best_cost = self.total_cost
+                best_path = current_path + [fron]
+                self.best_cost = best_cost
+                self.best_path = best_path
+            return
+
+        adjacent = self.vertices[current].head
+        while adjacent:
+            if adjacent.data not in visited_cities:
+                visited_cities.append(adjacent.data)
+                current_path.append(adjacent.data)
+
+                self.tsp_dfs(
+                    fron,
+                    adjacent.data,
+                    visited_cities,
+                    current_cost + adjacent.weight,
+                    current_path,
+                    best_cost,
+                    best_path
+                )
+            
+                visited_cities.remove(adjacent.data)
+                current_path.pop()
+            adjacent = adjacent.next
