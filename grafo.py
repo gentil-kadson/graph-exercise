@@ -1,6 +1,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 import csv
+import sys
 
 
 class Node:
@@ -53,14 +54,20 @@ class LinkedList:
             vertices.append(current.data)
             current = current.next
         return vertices
-    
+
+    def get_neighbouring_vertices_and_their_weights(self) -> dict[str, int]:
+        neighbouring_verteces = {}  
+        current = self.head
+        while current:
+            neighbouring_verteces[f'{current.data}'] = current.weight
+        return neighbouring_verteces
 
 class Graph:
     def __init__(self) -> None:
-        self.vertices: dict[int|str, LinkedList] = {}
+        self.vertices: dict[int | str, LinkedList] = {}
         self.max_cost: int = -1
         self.max_path: list[Node] = []
-        self.visited_dfs: list[str|int] = []
+        self.visited_dfs: list[str | int] = []
 
     def read_csv(self, filepath: str) -> None:
         with open(filepath, "r", newline='') as csv_file:
@@ -165,3 +172,27 @@ class Graph:
         plt.subplot(122)
         nx.draw(G, with_labels=True, font_weight="bold")
         plt.show()
+
+    def calculate_dijkstra(self, source_vertex: int | str):
+        if source_vertex not in self.vertices:
+            print("Esse vértice não existe nesse grafo.")
+            return
+        distances = { vertex: sys.maxsize for vertex in self.vertices }
+        distances[source_vertex] = 0
+
+        visited_vertices = set()
+
+        while visited_vertices != set(distances):
+            curr_vertex = None
+            min_distance = sys.maxsize
+            for vertex in self.vertices:
+                if vertex not in visited_vertices and distances[vertex] < min_distance:
+                    curr_vertex = vertex
+                    min_distance = distances[vertex]
+
+            visited_vertices.add(curr_vertex)
+
+            for neighbour, weight in self.vertices[curr_vertex].get_neighbouring_vertices_and_their_weights().items():
+                if distances[curr_vertex] + weight < distances[neighbour]:
+                    distances[neighbour] = distances[curr_vertex] + weight
+        return distances
