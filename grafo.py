@@ -60,6 +60,7 @@ class LinkedList:
         current = self.head
         while current:
             neighbouring_verteces[f'{current.data}'] = current.weight
+            current = current.next
         return neighbouring_verteces
 
 class Graph:
