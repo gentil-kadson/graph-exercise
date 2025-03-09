@@ -1,6 +1,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 import csv
+import math
 
 
 class Node:
@@ -62,8 +63,8 @@ class Graph:
         self.max_path: list[Node] = []
         self.visited_dfs: list[str|int] = []
 
-        self.best_cost: int = 0
-        self.best_path: list[str|int] = []
+        self.best_cost: int = math.inf
+        self.best_path: list[int|str] = []
 
     def read_csv(self, filepath: str) -> None:
         with open(filepath, "r", newline='') as csv_file:
@@ -169,6 +170,18 @@ class Graph:
         nx.draw(G, with_labels=True, font_weight="bold")
         plt.show()
     
+    def cost_fron_to(self, fron: str|int, to: str|int) -> int:
+        if fron not in self.vertices or to not in self.vertices:
+            raise Exception("Both or one of the vertices are not in the graph")
+
+        adjacent = self.vertices[fron].head
+        while adjacent:
+            if adjacent.data == to:
+                return adjacent.weight
+            adjacent = adjacent.next
+
+        print("Vertices are not connected")
+
     def tsp_dfs(
         self,
         fron: str|int,
@@ -176,25 +189,21 @@ class Graph:
         visited_cities: list[str|int],
         current_cost: int,
         current_path: list[str|int],
-        best_cost: int,
-        best_path: list[str|int]
     ) -> tuple[int, list[str|int]]:
         if len(visited_cities) == len(self.vertices):
             adjacent = self.vertices[current].head
             fron_to_current_cost: int = 0
 
             while adjacent:
-                if adjacent.data == current:
+                if adjacent.data == fron:
                     fron_to_current_cost = adjacent.weight
                     break
                 adjacent = adjacent.next
 
-            self.total_cost = current_cost + fron_to_current_cost
-            if self.total_cost < best_cost:
-                best_cost = self.total_cost
-                best_path = current_path + [fron]
-                self.best_cost = best_cost
-                self.best_path = best_path
+            total_cost = current_cost + fron_to_current_cost
+            if total_cost < self.best_cost:
+                self.best_cost = total_cost
+                self.best_path = current_path + [fron]
             return
 
         adjacent = self.vertices[current].head
@@ -209,8 +218,6 @@ class Graph:
                     visited_cities,
                     current_cost + adjacent.weight,
                     current_path,
-                    best_cost,
-                    best_path
                 )
             
                 visited_cities.remove(adjacent.data)
