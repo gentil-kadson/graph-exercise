@@ -5,7 +5,7 @@ import sys
 
 
 class Node:
-    def __init__(self, data: int|str, weight: int|None = None) -> None:
+    def __init__(self, data: int | str, weight: int|None = None) -> None:
         self.data = data
         self.next = None
         self.weight = weight
@@ -18,7 +18,7 @@ class LinkedList:
     def __init__(self, head: Node|None = None) -> None:
         self.head = head
     
-    def append(self, data: int|str, weight: int) -> None:
+    def append(self, data: int | str, weight: int) -> None:
         new_node = Node(data, weight)
 
         if self.head is None:
@@ -32,7 +32,7 @@ class LinkedList:
         
         last.next = new_node
     
-    def has(self, data: int|str) -> bool:
+    def has(self, data: int | str) -> bool:
         current = self.head
         while current:
             if current.data == data:
@@ -47,7 +47,7 @@ class LinkedList:
             current = current.next
         print()
     
-    def get_connected_vertices(self) -> list[int|str]:
+    def get_connected_vertices(self) -> list[int | str]:
         vertices = []
         current = self.head
         while current:
@@ -55,7 +55,7 @@ class LinkedList:
             current = current.next
         return vertices
 
-    def get_neighbouring_vertices_and_their_weights(self) -> dict[str, int]:
+    def get_neighbouring_vertices_and_their_weights(self) -> dict[int | str, int]:
         neighbouring_verteces = {}  
         current = self.head
         while current:
@@ -68,7 +68,7 @@ class Graph:
         self.vertices: dict[int | str, LinkedList] = {}
         self.max_cost: int = -1
         self.max_path: list[Node] = []
-        self.visited_dfs: list[str | int] = []
+        self.visited_dfs: list[int | str] = []
 
     def read_csv(self, filepath: str) -> None:
         with open(filepath, "r", newline='') as csv_file:
@@ -79,13 +79,13 @@ class Graph:
                 self.insert_vertex(to)
                 self.insert_edge(fron, to, int(row["Peso"]))
     
-    def insert_vertex(self, vertex: int|str) -> None:
+    def insert_vertex(self, vertex: int | str) -> None:
         if vertex in self.vertices:
             print("Esse vértice já está no grafo.")
             return
         self.vertices[vertex] = LinkedList()
 
-    def insert_edge(self, vertexA: int|str, vertexB: int|str, weight: int) -> None:
+    def insert_edge(self, vertexA: int | str, vertexB: int | str, weight: int) -> None:
         if vertexA not in self.vertices or vertexB not in self.vertices:
             print("Um dos vértices informados não existe.")
             return
@@ -111,10 +111,10 @@ class Graph:
 
     def dfs_biggest_cost(
             self, 
-            fron: int|str, 
-            to: int|str, 
+            fron: int | str, 
+            to: int | str, 
             current_cost: int, 
-            current_path: list[int|str]
+            current_path: list[int | str]
     ) -> None:
         if fron not in self.vertices or to not in self.vertices:
             raise Exception("Vertex doesn't exist in graph")
@@ -163,6 +163,47 @@ class Graph:
                     queue.append((connected_vertex, jumps+1))
         return "Nenhum caminho encontrado"
     
+    def reconstruct_path(self, 
+                         predecessors: dict[int | str, int | str | None], 
+                         start: int | str, 
+                         end: int | str
+        ) -> list[int | str]:
+        path: list[int | str] = []
+        while end:
+            path.append(end)
+            end = predecessors[end]
+        path.reverse()
+        return path if path[0] == start else []
+
+
+    def calculate_dijkstra(self, source_vertex: int | str):
+        if source_vertex not in self.vertices:
+            print("Esse vértice não existe nesse grafo.")
+            return
+        distances = { vertex: sys.maxsize for vertex in self.vertices }
+        predecessors: dict[int | str, int | str | None] = { vertex: None for vertex in self.vertices }
+        distances[source_vertex] = 0
+
+        visited_vertices: set[int | str] = set()
+
+        while visited_vertices != set(distances):
+            curr_vertex = None
+            min_distance = sys.maxsize
+            for vertex in self.vertices:
+                if vertex not in visited_vertices and distances[vertex] < min_distance:
+                    curr_vertex = vertex
+                    min_distance = distances[vertex]
+
+            visited_vertices.add(curr_vertex)
+
+            for neighbour, weight in self.vertices[curr_vertex].get_neighbouring_vertices_and_their_weights().items():
+                if distances[curr_vertex] + weight < distances[neighbour]:
+                    distances[neighbour] = distances[curr_vertex] + weight
+                    predecessors[neighbour] = curr_vertex
+        
+        shortest_paths = { vertex: self.reconstruct_path(predecessors, source_vertex, vertex) for vertex in self.vertices }
+        return distances, shortest_paths
+    
     def draw_graph(self) -> None:
         G = nx.Graph()
         edge_labels = {}
@@ -179,27 +220,3 @@ class Graph:
         nx.draw(G, pos, with_labels=True, font_weight="bold", node_color="lightblue", edge_color="gray")
         nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=12)
         plt.show()
-
-    def calculate_dijkstra(self, source_vertex: int | str):
-        if source_vertex not in self.vertices:
-            print("Esse vértice não existe nesse grafo.")
-            return
-        distances = { vertex: sys.maxsize for vertex in self.vertices }
-        distances[source_vertex] = 0
-
-        visited_vertices = set()
-
-        while visited_vertices != set(distances):
-            curr_vertex = None
-            min_distance = sys.maxsize
-            for vertex in self.vertices:
-                if vertex not in visited_vertices and distances[vertex] < min_distance:
-                    curr_vertex = vertex
-                    min_distance = distances[vertex]
-
-            visited_vertices.add(curr_vertex)
-
-            for neighbour, weight in self.vertices[curr_vertex].get_neighbouring_vertices_and_their_weights().items():
-                if distances[curr_vertex] + weight < distances[neighbour]:
-                    distances[neighbour] = distances[curr_vertex] + weight
-        return distances
