@@ -4,7 +4,11 @@ graph = Graph()
 
 graph.read_csv('./grafo_aula_dijkstra.csv')
 
-distances, shortest_paths = graph.calculate_dijkstra('A')
+origin = input("Where are you at? ")
+destination = input("Where do you want to go? ")
+
+distances, shortest_paths = graph.calculate_dijkstra(origin)
 
 for vertex, distance in distances.items():
-    print(f"Shortest path from A to {vertex}: {distance} ({shortest_paths[vertex]}).")
+    if vertex == destination:
+        print(f"Shortest path from {origin} to {vertex}: {distance} ({shortest_paths[vertex]}).")
