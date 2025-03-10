@@ -165,13 +165,19 @@ class Graph:
     
     def draw_graph(self) -> None:
         G = nx.Graph()
+        edge_labels = {}
+
         for vertex, adjacent in self.vertices.items():
             current = adjacent.head
             while current:
                 G.add_edge(vertex, current.data, weight=current.weight)
+                edge_labels[(vertex, current.data)] = current.weight
                 current = current.next
-        plt.subplot(122)
-        nx.draw(G, with_labels=True, font_weight="bold")
+        
+        pos = nx.spring_layout(G)
+        plt.figure(figsize=(8, 6))
+        nx.draw(G, pos, with_labels=True, font_weight="bold", node_color="lightblue", edge_color="gray")
+        nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=12)
         plt.show()
 
     def calculate_dijkstra(self, source_vertex: int | str):
